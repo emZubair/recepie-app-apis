@@ -3,7 +3,7 @@
 from django.db import models
 from django.test import TestCase
 from django.contrib.auth import get_user_model
-from core.models import Tag, Ingredient
+from core.models import Tag, Ingredient, Recepie
 
 
 def sample_user(email='test@example.com', password='admin12345'):
@@ -69,3 +69,15 @@ class ModelTests(TestCase):
         )
 
         self.assertEqual(str(ingred), ingred.name)
+
+    def test_recepie_str(self):
+        """Test string representation of Recepie"""
+
+        recepie = Recepie.objects.create(
+            title='Tikka Biryani',
+            user=self.user,
+            minutes_to_deliver=30,
+            price=250
+        )
+
+        self.assertEqual(str(recepie), recepie.title)
