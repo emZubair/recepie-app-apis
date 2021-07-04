@@ -75,7 +75,7 @@ class ModelTests(TestCase):
 
         recepie = Recepie.objects.create(
             title='Tikka Biryani',
-            user=self.user,
+            user=sample_user(),
             minutes_to_deliver=30,
             price=250
         )

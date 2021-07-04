@@ -1,7 +1,7 @@
 """ Admin for core app """
 
 from django.contrib import admin
-from .models import User, Tag, Ingredient
+from .models import User, Tag, Ingredient, Recepie
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.translation import gettext as _
 
@@ -26,5 +26,6 @@ class UserAdmin(BaseUserAdmin):
 
 
 admin.site.register(Tag)
+admin.site.register(Recepie)
 admin.site.register(Ingredient)
 admin.site.register(User, UserAdmin)

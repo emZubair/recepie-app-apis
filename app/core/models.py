@@ -65,3 +65,18 @@ class Ingredient(models.Model):
 
     def __str__(self) -> str:
         return self.name
+
+
+class Recepie(models.Model):
+    """Recepie model"""
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    title = models.CharField(max_length=32)
+    minutes_to_deliver = models.PositiveSmallIntegerField()
+    price = models.DecimalField(max_digits=5, decimal_places=2)
+    link = models.CharField(max_length=32, blank=True)
+    ingredients = models.ManyToManyField('Ingredient')
+    tags = models.ManyToManyField('Tag')
+
+    def __str__(self) -> str:
+        return self.title
