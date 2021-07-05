@@ -1,9 +1,10 @@
-from rest_framework import viewsets, mixins
+
+from rest_framework import serializers, viewsets, mixins
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 
-from core.models import Tag, Ingredient
-from .serializers import TagSerializer, IngredientSerializer
+from core.models import Tag, Ingredient, Recepie
+from .serializers import TagSerializer, IngredientSerializer, RecepieSerializer
 
 
 class BaseRecipieAttributes(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.CreateModelMixin):
@@ -31,3 +32,16 @@ class IngredientViewSet(BaseRecipieAttributes):
 
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
+
+
+class RecepieViewSet(viewsets.ModelViewSet):
+    """Manage recepies"""
+
+    queryset = Recepie.objects.all()
+    serializer_class = RecepieSerializer
+    permission_classes = (IsAuthenticated, )
+    authentication_classes = (TokenAuthentication, )
+
+    def get_queryset(self):
+        """Receive Recepies related to authenticated user"""
+        return self.queryset.filter(user=self.request.user).order_by('-id')
