@@ -38,3 +38,10 @@ class RecepieSerializer(serializers.ModelSerializer):
                   'minutes_to_deliver', 'link', 'tags', 'ingredients')
 
         read_only_fields = ('id',)
+
+
+class RecepieDetailSerializer(RecepieSerializer):
+    """ Serializer for recepie detail """
+
+    tags = TagSerializer(many=True, read_only=True)
+    ingredients = IngredientSerializer(many=True, read_only=True)

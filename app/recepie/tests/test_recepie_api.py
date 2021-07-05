@@ -5,11 +5,29 @@ from django.test import TestCase
 from rest_framework import serializers, status
 from rest_framework.test import APIClient
 
-from core.models import Recepie
-from recepie.serializers import RecepieSerializer
+from core.models import Recepie, Tag, Ingredient
+from recepie.serializers import RecepieSerializer, RecepieDetailSerializer
 
 
 RECEPIE_URL = reverse('recepie:recepie-list')
+
+
+def detail_url(recepie_id):
+    """Create a recepie URL"""
+
+    return reverse('recepie:recepie-detail', args=[recepie_id])
+
+
+def sample_tag(user, name='Main Tag'):
+    """Create a sample Tag"""
+
+    return Tag.objects.create(user=user, name=name)
+
+
+def sample_ingredient(user, name='Main Ingredient'):
+    """Create and return a sample Ingredients"""
+
+    return Ingredient.objects.create(user=user, name=name)
 
 
 def sample_recepie(user, **params):
@@ -18,7 +36,7 @@ def sample_recepie(user, **params):
     defaults = {'title': 'Sample Recepie',
                 'minutes_to_deliver': 30, 'price': 35.6}
     defaults.update(params)
-    Recepie.objects.create(user=user, **defaults)
+    return Recepie.objects.create(user=user, **defaults)
 
 
 class PublicRecepieAPITests(TestCase):
@@ -72,3 +90,14 @@ class PrivateRecepieAPITests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(len(res.data), 1)
         self.assertEqual(res.data, serializer.data)
+
+    def test_view_recepie_detail(self):
+        """Test viewing a recepie details"""
+        recepie = sample_recepie(self.user)
+        recepie.tags.add(sample_tag(self.user))
+        recepie.ingredients.add(sample_ingredient(self.user))
+
+        url = detail_url(recepie.id)
+        response = self.client.get(url)
+        serializer = RecepieDetailSerializer(recepie)
+        self.assertEqual(response.data, serializer.data)
