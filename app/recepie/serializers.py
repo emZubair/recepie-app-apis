@@ -34,7 +34,7 @@ class RecepieSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recepie
-        fields = ('id', 'title', 'user', 'price',
+        fields = ('id', 'title', 'price',
                   'minutes_to_deliver', 'link', 'tags', 'ingredients')
 
         read_only_fields = ('id',)
