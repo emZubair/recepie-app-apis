@@ -1,4 +1,8 @@
 import logging
+import os
+import tempfile
+from PIL import Image
+
 from decimal import Decimal
 from django.contrib.auth import get_user_model
 from django.core.handlers.base import logger
@@ -17,6 +21,11 @@ logger = logging.getLogger(__file__)
 
 
 RECEPIE_URL = reverse('recepie:recepie-list')
+
+
+def image_upload_url(recepie_id):
+    """Return url for recepie image upload"""
+    return reverse('recepie:recepie-image-upload', args=[recepie_id])
 
 
 def detail_url(recepie_id):
@@ -213,3 +222,42 @@ class PrivateRecepieAPITests(TestCase):
         recepie.refresh_from_db()
         self.assertEqual(payload.get('title'), recepie.title)
         self.assertEqual(recepie.tags.count(), 0)
+
+
+class RecepieImageUploadTests(TestCase):
+    """Test to test image uploading"""
+
+    def setUp(self) -> None:
+        self.client = APIClient()
+        self.user = get_user_model().objects.create_user(
+            email='test@example.com', password='admin12345')
+        self.client.force_authenticate(self.user)
+        self.recepie = sample_recepie(self.user)
+
+    def tearDown(self) -> None:
+        self.recepie.image.delete()
+
+    def test_upload_image_to_recepie(self):
+        """Test uploading image to recepie """
+
+        url = image_upload_url(self.recepie.id)
+        with tempfile.NamedTemporaryFile(suffix='.png') as ntf:
+            image = Image.new('RGB', (10, 10))
+            image.save(ntf, format='PNG')
+            ntf.seek(0)
+            response = self.client.post(
+                url, {'image': ntf}, format='multipart')
+
+        self.recepie.refresh_from_db()
+        self.assertTrue(response.status_code, status.HTTP_200_OK)
+        self.assertIn('image', response.data)
+        self.assertTrue(os.path.exists(self.recepie.image.path))
+
+    def test_upload_bad_image(self):
+        """Test uploading bad image"""
+
+        url = image_upload_url(self.recepie.id)
+        response = self.client.post(
+            url, {'image': 'A quick brown fox'}, format='multipart')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

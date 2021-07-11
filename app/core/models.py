@@ -1,7 +1,18 @@
+import os
+import uuid
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import (AbstractBaseUser, BaseUserManager,
                                         PermissionsMixin)
+
+
+def recepie_image_file_path(instance, filename):
+    """Generating file path for new recepie Image"""
+
+    extension = filename.split('.')[-1]
+    filename = f'{uuid.uuid4()}.{extension}'
+    print(f'File name:{filename}')
+    return os.path.join('upload/recepie/', filename)
 
 
 class UserManager(BaseUserManager):
@@ -77,6 +88,7 @@ class Recepie(models.Model):
     link = models.CharField(max_length=32, blank=True)
     ingredients = models.ManyToManyField('Ingredient')
     tags = models.ManyToManyField('Tag')
+    image = models.ImageField(null=True, upload_to=recepie_image_file_path)
 
     def __str__(self) -> str:
         return self.title
