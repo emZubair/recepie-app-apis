@@ -45,3 +45,12 @@ class RecepieDetailSerializer(RecepieSerializer):
 
     tags = TagSerializer(many=True, read_only=True)
     ingredients = IngredientSerializer(many=True, read_only=True)
+
+
+class RecepieImageSerializer(serializers.ModelSerializer):
+    """Serializer for uploading images"""
+
+    class Meta:
+        model = Recepie
+        fields = ('id', 'image')
+        read_only_fields = ('id',)

@@ -1,9 +1,9 @@
 """Test cases for Core app"""
 
-from django.db import models
+from unittest.mock import patch
 from django.test import TestCase
 from django.contrib.auth import get_user_model
-from core.models import Tag, Ingredient, Recepie
+from core.models import Tag, Ingredient, Recepie, recepie_image_file_path
 
 
 def sample_user(email='test@example.com', password='admin12345'):
@@ -81,3 +81,14 @@ class ModelTests(TestCase):
         )
 
         self.assertEqual(str(recepie), recepie.title)
+
+    @patch('uuid.uuid4')
+    def test_image_name_uuid(self, mock_uuid):
+        """Test image is saved in correct location"""
+
+        uuid = 'test-uuid'
+        mock_uuid.return_value = uuid
+        file_path = recepie_image_file_path(None, 'my_image.png')
+        expected_path = f'uploads/recepie/{uuid}.png'
+
+        self.assertEqual(file_path, file_path)
