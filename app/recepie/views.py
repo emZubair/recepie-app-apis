@@ -1,5 +1,6 @@
 
 from os import path
+from django.db.models import query
 from rest_framework import viewsets, mixins, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -18,7 +19,12 @@ class BaseRecipieAttributes(viewsets.GenericViewSet, mixins.ListModelMixin, mixi
     permission_classes = (IsAuthenticated, )
 
     def get_queryset(self):
-        return self.queryset.filter(user=self.request.user).order_by('-name')
+        assigned_only = bool(
+            int(self.request.query_params.get('assigned_only', 0)))
+        queryset = self.queryset
+        if assigned_only:
+            queryset = queryset.filter(recepie__isnull=False)
+        return queryset.filter(user=self.request.user).order_by('-name').distinct()
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)

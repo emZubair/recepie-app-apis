@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from core.models import Ingredient
+from core.models import Ingredient, Recepie
 from recepie.serializers import IngredientSerializer
 
 
@@ -80,3 +80,41 @@ class PrivateIngredientsAPITest(TestCase):
         res = self.client.post(INGREDIENTS_URL, {'name': ''})
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_ingredients_assigned_to_recepie(self):
+        """Test only those ingredients are returned assigned to recepie"""
+
+        ingredient1 = Ingredient.objects.create(user=self.user, name='Chicken')
+        ingredient2 = Ingredient.objects.create(user=self.user, name='Fish')
+
+        recepie = Recepie.objects.create(
+            title='Chicken Biryani', minutes_to_deliver=45, price=300, user=self.user)
+
+        recepie.ingredients.add(ingredient1)
+
+        response = self.client.get(INGREDIENTS_URL, {'assigned_only': 1})
+
+        serializer1 = IngredientSerializer(ingredient1)
+        serializer2 = IngredientSerializer(ingredient2)
+
+        self.assertIn(serializer1.data, response.data)
+        self.assertNotIn(serializer2.data, response.data)
+
+    def test_ingredients_filter_unique(self):
+        """Test unique ingredients are assigned"""
+
+        ingredient1 = Ingredient.objects.create(user=self.user, name='Chicken')
+        Ingredient.objects.create(user=self.user, name='Fish')
+
+        recepie = Recepie.objects.create(
+            title='Chicken Biryani', minutes_to_deliver=45, price=300, user=self.user)
+
+        recepie.ingredients.add(ingredient1)
+
+        recepie2 = Recepie.objects.create(
+            title='Fish Kabab', minutes_to_deliver=45, price=300, user=self.user)
+
+        recepie2.ingredients.add(ingredient1)
+
+        response = self.client.get(INGREDIENTS_URL, {'assigned_only': 1})
+        self.assertEqual(len(response.data), 1)
