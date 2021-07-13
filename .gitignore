@@ -23,6 +23,7 @@ cms/envs/private.py
 /nbproject
 .idea/
 .redcar/
+.media/
 codekit-config.json
 .pycharm_helpers/
 /_mac/*

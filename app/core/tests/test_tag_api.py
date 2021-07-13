@@ -7,7 +7,7 @@ from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from core.models import Tag
+from core.models import Tag, Recepie
 from recepie.serializers import TagSerializer
 
 
@@ -82,3 +82,42 @@ class PrivateTagsAPITest(TestCase):
         payload = {'name': ''}
         res = self.client.post(TAGS_URL, payload)
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_retrive_tags_assigned_to_recepie(self):
+        """ Filter tags assigned to a recepie """
+
+        tag1 = Tag.objects.create(user=self.user, name='Breakfast')
+        tag2 = Tag.objects.create(user=self.user, name='Dinner')
+
+        recepie = Recepie.objects.create(
+            title='Chicken Biryani', minutes_to_deliver=45, price=300, user=self.user)
+
+        recepie.tags.add(tag1)
+
+        response = self.client.get(TAGS_URL, {'assigned_only': 1})
+
+        serializer1 = TagSerializer(tag1)
+        serializer2 = TagSerializer(tag2)
+
+        self.assertIn(serializer1.data, response.data)
+        self.assertNotIn(serializer2.data, response.data)
+
+    def test_recepie_tags_assigned_are_unique(self):
+        """Test Only those tags are returned that are assigned to Recepies"""
+
+        tag1 = Tag.objects.create(user=self.user, name='Breakfast')
+        Tag.objects.create(user=self.user, name='Dinner')
+
+        recepie = Recepie.objects.create(
+            title='Chicken Biryani', minutes_to_deliver=45, price=300, user=self.user)
+
+        recepie.tags.add(tag1)
+
+        recepie2 = Recepie.objects.create(
+            title='Chicken Jelly Fish', minutes_to_deliver=60, price=500, user=self.user)
+
+        recepie2.tags.add(tag1)
+
+        response = self.client.get(TAGS_URL, {'assigned_only': 1})
+
+        self.assertEqual(len(response.data), 1)
