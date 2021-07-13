@@ -15,9 +15,7 @@ COPY ./app /app
 
 RUN mkdir -p /vol/web/media
 RUN mkdir -p /vol/web/static
-RUN mkdir -p /vol/web/upload
 RUN adduser -D user
 RUN chown -R user:user /vol/
-RUN chown -R 666 /vol/web
-RUN chown -R 0755 /vol/web
+RUN chown -R 760 /vol/web
 USER user

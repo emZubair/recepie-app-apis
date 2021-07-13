@@ -46,9 +46,21 @@ class RecepieViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, )
     authentication_classes = (TokenAuthentication, )
 
+    def _parse_tags_to_int(self, qs):
+        return [int(str_id) for str_id in qs.split(',')]
+
     def get_queryset(self):
         """Receive Recepies related to authenticated user"""
-        return self.queryset.filter(user=self.request.user).order_by('-id')
+
+        tags = self.request.query_params.get('tags')
+        ingredients = self.request.query_params.get('ingredient')
+        queryset = self.queryset
+        if tags:
+            queryset.filter(tags__id__in=self._parse_tags_to_int(tags))
+        if ingredients:
+            queryset.filter(
+                ingredients__id__in=self._parse_tags_to_int(ingredients))
+        return queryset.filter(user=self.request.user).order_by('-id')
 
     def get_serializer_class(self, *args, **kwargs):
         """Return appropiate serializer class """

@@ -149,7 +149,6 @@ class PrivateRecepieAPITests(TestCase):
         response = self.client.post(RECEPIE_URL, payload)
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        print(f' Receive data: {response.data}')
         recepie = Recepie.objects.get(pk=response.data['id'])
         tags = recepie.tags.all()
 
@@ -174,7 +173,6 @@ class PrivateRecepieAPITests(TestCase):
         response = self.client.post(RECEPIE_URL, payload)
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        print(f' Receive data: {response.data}')
         recepie = Recepie.objects.get(pk=response.data['id'])
         ings = recepie.ingredients.all()
 
@@ -261,3 +259,54 @@ class RecepieImageUploadTests(TestCase):
             url, {'image': 'A quick brown fox'}, format='multipart')
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_filter_recepies_by_tags(self):
+        """ Test APIs filter working """
+
+        recepie1 = sample_recepie(self.user, title='Biryani')
+        recepie2 = sample_recepie(self.user, title='Cucumber')
+
+        tag1 = sample_tag(self.user, name='Vegan')
+        tag2 = sample_tag(self.user, name='Vegetarian')
+
+        recepie1.tags.add(tag1)
+        recepie2.tags.add(tag2)
+
+        recepie3 = sample_recepie(self.user, title='Fish')
+
+        response = self.client.get(
+            RECEPIE_URL, {'tags': f'{tag1.id}, {tag2.id}'})
+
+        serializer1 = RecepieSerializer(recepie1)
+        serializer2 = RecepieSerializer(recepie2)
+        serializer3 = RecepieSerializer(recepie3)
+
+        self.assertIn(serializer1.data, response.data)
+        self.assertIn(serializer2.data, response.data)
+        self.assertIn(serializer3.data, response.data)
+
+    def test_filter_recepies_by_ingredients(self):
+        """Test recepies are filtered by ingredients """
+
+        recepie1 = sample_recepie(self.user, title='Biryani')
+        recepie2 = sample_recepie(self.user, title='Cucumber')
+        recepie3 = sample_recepie(self.user, title='Fish')
+
+        ingredient1 = sample_ingredient(self.user, name='Rice')
+        ingredient2 = sample_ingredient(self.user, name='Chilli')
+        ingredient3 = sample_ingredient(self.user, name='Fish')
+
+        recepie1.ingredients.add(ingredient1)
+        recepie2.ingredients.add(ingredient2)
+        recepie3.ingredients.add(ingredient3)
+
+        response = self.client.get(
+            RECEPIE_URL, {'ingredient': f'{ingredient1.id}, {ingredient2.id}'})
+
+        serializer1 = RecepieSerializer(recepie1)
+        serializer2 = RecepieSerializer(recepie2)
+        serializer3 = RecepieSerializer(recepie3)
+
+        self.assertIn(serializer1.data, response.data)
+        self.assertIn(serializer2.data, response.data)
+        self.assertIn(serializer3.data, response.data)

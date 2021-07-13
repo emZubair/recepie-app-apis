@@ -1,12 +1,8 @@
 """User app serializers """
 
-import logging
 from django.contrib.auth import get_user_model, authenticate
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
-
-
-log = logging.getLogger(__file__)
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -43,17 +39,15 @@ class AuthTokenSerializer(serializers.Serializer):
 
     def validate(self, attrs):
         """Validate and authenticate user"""
-        import pdb
-        pdb.set_trace()
+
         email = attrs.get('email')
         password = attrs.get('password')
 
         user = authenticate(request=self.context.get(
-            'request'), username=email, password=password)
-        log.info(f'Email:{email} password:{password} user:{user}')
+            'request'), email=email, password=password)
         if not user:
             message = _('Unable to authenticate user with given credentials')
-            return serializers.ValidationError(message, code='authentication')
+            raise serializers.ValidationError(message, code='authentication')
 
         attrs['user'] = user
         return attrs

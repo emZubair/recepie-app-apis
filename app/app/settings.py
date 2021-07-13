@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
+import os
 from os import environ
 from pathlib import Path
 
@@ -127,8 +128,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
-MEDIA_URL = '/media/'
-MEDIA_ROOT = '/vol/web/media'
+MEDIA_URL = 'media/'
+# MEDIA_ROOT = '/vol/web/media'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 STATIC_ROOT = '/vol/web/static'
 
 # Default primary key field type
