@@ -22,5 +22,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/users/', include('user.urls')),
     path('updates/', include('updates.urls')),
-    path('api/recepie/', include('recepie.urls'))
+    path('api/updates/', include('updates.api.urls')),
+    path('api/recepie/', include('recepie.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
