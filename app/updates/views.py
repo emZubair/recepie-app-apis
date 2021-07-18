@@ -38,16 +38,16 @@ class JsonView(JsonResponseMixin, View):
 class SerializerListView(View):
     def get(self, request, *args, **kwargs):
 
-        qs = UpdateModel.objects.all()
-        data = serialize('json', qs, fields=('user', 'content'))
+        qs = UpdateModel.objects.all().serialize()
+        # data = serialize('json', qs, fields=('user', 'content'))
 
-        return HttpResponse(data, content_type='application/json')
+        return HttpResponse(qs, content_type='application/json')
 
 
 class SerializerDetailsView(View):
     def get(self, request, *args, **kwargs):
 
-        qs = UpdateModel.objects.get(pk=1)
-        data = serialize('json', [qs], fields=('user', 'content'))
+        qs = UpdateModel.objects.get(pk=1).serialize()
+        # data = serialize('json', [qs.serialize()], fields=('user', 'content'))
 
-        return HttpResponse(data, content_type='application/json')
+        return HttpResponse(qs, content_type='application/json')
