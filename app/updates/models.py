@@ -10,7 +10,7 @@ def upload_update_iamge(instance, image_name):
 class UpdateQuerySet(models.QuerySet):
     def serialize(self):
         qs = list(self.values('user', 'content', 'image', 'id'))
-        print(qs)
+        # print(qs)
         return json.dumps(qs)
 
 
